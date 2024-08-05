@@ -1,0 +1,107 @@
+.notFoundWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.notFoundDesc {
+  letter-spacing: 0.25rem;
+  font-size: 1rem;
+  animation: notFoundDescAnim 7s forwards;
+}
+
+.notFound {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  column-gap: 0.5rem;
+  font-size: 6rem;
+  animation: notFoundAnim 5s forwards;
+
+  .first {
+    color: red;
+    animation: firstAnim ease-in 5s forwards;
+  }
+
+  .second {
+    color: green;
+    animation: secondAnim ease-in-out 6s forwards;
+  }
+
+  .third {
+    color: blue;
+    animation: thirdAnim ease-out 7s forwards;
+  }
+}
+
+.notFound > * {
+  padding: 0.5rem;
+  aspect-ratio: 1;
+}
+
+@keyframes notFoundAnim {
+  0% {
+    column-gap: 2rem;
+  }
+  75% {
+    column-gap: 0.5rem;
+  }
+}
+
+@keyframes firstAnim {
+  0% {
+    color: red;
+  }
+
+  50% {
+    background-color: red;
+    color: #4d5e61;
+  }
+
+  100% {
+    background-color: #4d5e61;
+    color: whitesmoke;
+  }
+}
+
+@keyframes secondAnim {
+  0% {
+    color: green;
+  }
+
+  50% {
+    background-color: green;
+    color: #4d5e61;
+  }
+
+  100% {
+    background-color: #4d5e61;
+    color: whitesmoke;
+  }
+}
+
+@keyframes thirdAnim {
+  0% {
+    color: blue;
+  }
+
+  50% {
+    background-color: blue;
+    color: #4d5e61;
+  }
+
+  100% {
+    background-color: #4d5e61;
+    color: whitesmoke;
+  }
+}
+
+@keyframes notFoundDescAnim {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}

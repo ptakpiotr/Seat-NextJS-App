@@ -1,0 +1,26 @@
+.spinner {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  column-gap: 0.5rem;
+
+  animation: spinnerAnim 5s ease-in-out infinite;
+
+  .spinnerBlock {
+    width: 4rem;
+    height: 8rem;
+    background-color: #4d5e61;
+  }
+}
+
+@keyframes spinnerAnim {
+  0% {
+    column-gap: 2rem;
+  }
+  50% {
+    column-gap: 0.5rem;
+  }
+  100% {
+    column-gap: 2rem;
+  }
+}
