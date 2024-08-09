@@ -4,6 +4,25 @@ const nextConfig = {
         config.externals = [...config.externals, { canvas: 'canvas' }]; // required to make Konva & react-konva work
         return config;
     },
+    experimental:{
+        serverActions: true
+    },
+    images: {
+        remotePatterns:[
+            {
+                protocol: 'http',
+                hostname: 'openweathermap.org',
+                port: '',
+                pathname: '/img/**',
+              },
+              {
+                protocol: 'https',
+                hostname: 'images.unsplash.com',
+                port: '',
+                pathname: '/**',
+              },
+        ]
+    }
 }
 
 module.exports = nextConfig
