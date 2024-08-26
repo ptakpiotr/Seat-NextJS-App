@@ -5,29 +5,51 @@ import {
   NotebookIcon,
   CalendarIcon,
   PersonStandingIcon,
+  LogInIcon,
+  LogOutIcon,
+  LockIcon,
 } from "lucide-react";
 
 import styles from "./Navbar.module.css";
+import { getServerSession } from "next-auth";
 
-function Navbar() {
+async function Navbar() {
+  const session = await getServerSession();
+  const isLogged = !!session?.user;
+
   return (
     <header className={styles.navbar}>
       <div className={styles.links}>
         <Link className={styles.navbarLink} href="/">
           Home <HomeIcon />
         </Link>
-        <Link className={styles.navbarLink} href="news">
+        <Link className={styles.navbarLink} href="/news">
           News <NewspaperIcon />
         </Link>
-        <Link className={styles.navbarLink} href="planner">
-          Planner <NotebookIcon />
+        <Link
+          className={!isLogged ? styles.navbarLinkLocked : styles.navbarLink}
+          href="/planner"
+        >
+          Planner {!isLogged ? <LockIcon /> : <NotebookIcon />}
         </Link>
-        <Link className={styles.navbarLink} href="calendar">
-          Calendar <CalendarIcon />
+        <Link
+          className={!isLogged ? styles.navbarLinkLocked : styles.navbarLink}
+          href="/calendar"
+        >
+          Calendar {!isLogged ? <LockIcon /> : <CalendarIcon />}
         </Link>
-        <Link className={styles.navbarLink} href="about">
+        <Link className={styles.navbarLink} href="/about">
           About <PersonStandingIcon />
         </Link>
+        {!isLogged ? (
+          <Link className={styles.navbarLink} href="/api/auth/signin">
+            Login <LogInIcon />
+          </Link>
+        ) : (
+          <Link className={styles.navbarLink} href="/api/auth/signout">
+            Logout <LogOutIcon />
+          </Link>
+        )}
       </div>
     </header>
   );

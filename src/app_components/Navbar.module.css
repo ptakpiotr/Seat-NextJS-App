@@ -13,5 +13,14 @@
 
 .navbarLink:hover {
   scale: 1.1;
-  border-bottom: 0.1rem solid #4D5E61;
+  border-bottom: 0.1rem solid #4d5e61;
+}
+
+.navbarLinkLocked {
+  display: flex;
+  column-gap: 0.25rem;
+  padding: 0.5rem;
+  margin: 0.25rem;
+  transition: scale 0.3s ease-in-out;
+  color: #4d5e61;
 }

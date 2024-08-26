@@ -7,15 +7,15 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-
+import { Textarea } from "@/components/ui/textarea";
+import { handleNewsFormSubmit } from "@/misc/serverActions";
 import { PanelBottomCloseIcon } from "lucide-react";
 
-const handleFormSubmit = async (formData: FormData) => {
-  "use server";
-  console.log(formData.get("title"));
-};
+interface IProps {
+  closeDrawer: () => void;
+}
 
-function AddNews() {
+function AddNews({ closeDrawer }: IProps) {
   return (
     <DrawerContent>
       <DrawerHeader className="sm:text-center">
@@ -37,10 +37,27 @@ function AddNews() {
           </DrawerClose>
         </div>
         <DrawerDescription>
-          <form action={handleFormSubmit}>
-            <Input style={{margin : "0.5rem"}} type="text" name="title" placeholder="Title" />
-            <Input style={{margin : "0.5rem"}} type="url" name="image" placeholder="Image" />
-            <Button type="submit">Add</Button>
+          <form action={handleNewsFormSubmit}>
+            <Input
+              style={{ margin: "0.5rem" }}
+              type="text"
+              name="title"
+              placeholder="Title"
+            />
+            <Input
+              style={{ margin: "0.5rem" }}
+              type="file"
+              name="image"
+              placeholder="Image"
+            />
+            <Textarea
+              style={{ margin: "0.5rem" }}
+              name="description"
+              placeholder="Description"
+            />
+            <Button type="submit" onClick={closeDrawer}>
+              Add
+            </Button>
           </form>
         </DrawerDescription>
       </DrawerHeader>
