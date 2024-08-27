@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerTrigger } from "@/components/ui/drawer";
 import { PlusIcon } from "lucide-react";
 import { useCallback, useState } from "react";
-import { News } from "prisma/prisma-client";
+import { ICardNews } from "../../Types";
 
 interface IProps {
   isLogged: boolean;
-  news: News[];
+  news: ICardNews[];
 }
 
 function NewsContent({ isLogged, news }: IProps) {
@@ -42,15 +42,16 @@ function NewsContent({ isLogged, news }: IProps) {
       >
         {news.map((n) => (
           <SingleNewsCard
+            key={n.id?.toString()}
             author={{
-              id: 1,
-              image: "http://openweathermap.org/img/wn/01d@2x.png",
-              name: "Piotr Ptak",
+              id: n.authorId,
+              name: n.author.name,
             }}
-            id={parseInt(n.id.toString())}
+            id={n.id?.toString()}
+            description={n.description}
             image={`${process.env.NEXT_PUBLIC_AZ_STORAGE_CONTAINER_URL}${n.image}`}
             title={n.title}
-            categories={[]}
+            tags={n.tags}
           />
         ))}
       </div>

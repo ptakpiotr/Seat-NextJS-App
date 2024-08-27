@@ -12,4 +12,11 @@ export const newsSchema = yup.object({
   ),
 });
 
+export const eventSchema = yup.object({
+  start: yup.date().required(),
+  end: yup.date().required(),
+  info: yup.string().required(),
+});
+
 export type AddNewsType = yup.InferType<typeof newsSchema>;
+export type EventType = yup.InferType<typeof eventSchema>;

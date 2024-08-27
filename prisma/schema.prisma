@@ -19,10 +19,30 @@ model News {
   description String
   image       String
   tags        Tag[]
+  author      Author @relation(fields: [authorId], references: [id])
+  authorId    String
 }
 
 model Tag {
   id   BigInt @id @default(autoincrement())
   name String
   news News[]
+}
+
+model Event {
+  id       Int      @id @default(autoincrement())
+  start    DateTime
+  end      DateTime
+  info     String
+  author   Author   @relation(fields: [authorId], references: [id])
+  authorId String
+  people   Author[] @relation("People")
+}
+
+model Author {
+  id         String  @id
+  name       String  @unique
+  news       News[]
+  event      Event[]
+  userEvents Event[] @relation("People")
 }

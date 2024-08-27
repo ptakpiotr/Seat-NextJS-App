@@ -75,6 +75,7 @@ export interface ISingleWeather {
 }
 
 export interface IAppCalendarEvent {
+  id?: number;
   start: Date;
   end: Date;
   info: string;
@@ -86,9 +87,8 @@ interface ICategory {
 }
 
 interface IAuthor {
-  id: number;
+  id: string;
   name: string;
-  image: string;
 }
 
 export interface IBasicNews {
@@ -98,6 +98,23 @@ export interface IBasicNews {
   title: string;
   categories: ICategory[];
 }
+
+export interface ICardNews {
+  id: bigint;
+  title: string;
+  description: string;
+  image: string;
+  authorId: string;
+  tags: {
+    id: bigint;
+    name: string;
+  }[];
+  author: {
+    id: string;
+    name: string;
+  };
+}
+[];
 
 type DailyUnits = {
   [Property in keyof ISingleWeather]: string;

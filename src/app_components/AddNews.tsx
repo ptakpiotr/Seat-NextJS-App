@@ -55,6 +55,11 @@ function AddNews({ closeDrawer }: IProps) {
               name="description"
               placeholder="Description"
             />
+             <Textarea
+              style={{ margin: "0.5rem" }}
+              name="tags"
+              placeholder="Tags (separated with ,)"
+            />
             <Button type="submit" onClick={closeDrawer}>
               Add
             </Button>

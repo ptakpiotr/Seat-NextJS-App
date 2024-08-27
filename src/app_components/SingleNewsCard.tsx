@@ -10,11 +10,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import Link from "next/link";
-import { IBasicNews } from "../../Types";
+import { ICardNews } from "../../Types";
 
-type Props = IBasicNews;
+type Props = Omit<ICardNews, "authorId" | "id"> & {
+  id: string;
+};
 
-function SingleNewsCard({ author, categories, id, image, title }: Props) {
+function SingleNewsCard({ author, tags, id, image, title }: Props) {
   return (
     <Link href={`/news/${id}`}>
       <Card
@@ -37,7 +39,6 @@ function SingleNewsCard({ author, categories, id, image, title }: Props) {
             }}
           >
             <Avatar>
-              <AvatarImage src={author.image} />
               <AvatarFallback>{author.name.substring(2)}</AvatarFallback>
             </Avatar>
             <h1>{title}</h1>
@@ -46,7 +47,7 @@ function SingleNewsCard({ author, categories, id, image, title }: Props) {
             <Image src={image} width="600" height="350" alt={title} />
           </CardDescription>
           <CardFooter>
-            {categories.map((c) => (
+            {tags.map((c) => (
               <Badge key={`badge_${c.id}`} variant="secondary">
                 {c.name}
               </Badge>

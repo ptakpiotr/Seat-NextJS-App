@@ -1,3 +1,6 @@
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { PrismaClient } from "@prisma/client";
 import { Metadata } from "next";
 import Image from "next/image";
 
@@ -7,17 +10,39 @@ interface IProps {
   };
 }
 
-function SingleNews({ params: { id } }: IProps) {
-  return (
+async function SingleNews({ params: { id } }: IProps) {
+  const client = new PrismaClient();
+  const news = await client.news.findFirst({
+    where: {
+      id: {
+        equals: BigInt(id),
+      },
+    },
+    include: {
+      tags: true,
+    },
+  });
+  return news ? (
     <div>
-      SingleNews {id}
+      {news.title} {id}
       <Image
-        src="https://images.unsplash.com/photo-1700519141361-268fcb0390ea?q=80&w=326&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        src={`${process.env.NEXT_PUBLIC_AZ_STORAGE_CONTAINER_URL}${news.image}`}
         width="600"
         height="300"
-        alt="News image"
+        alt={news.title}
       />
+      <Separator />
+      <p>{news.description}</p>
+      <div>
+        {news.tags.map((c) => (
+          <Badge key={`badge_${c.id}`} variant="secondary">
+            {c.name}
+          </Badge>
+        ))}
+      </div>
     </div>
+  ) : (
+    <></>
   );
 }
 
@@ -26,15 +51,18 @@ export default SingleNews;
 export const revalidate = 36000;
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return [
-    {
-      id: "1",
+export async function generateStaticParams() {
+  const client = new PrismaClient();
+
+  const ids = await client.news.findMany({
+    select: {
+      id: true,
     },
-    {
-      id: "2",
-    },
-  ];
+  });
+
+  return ids.map((id) => {
+    id: id?.toString();
+  });
 }
 
 export function generateMetadata({ params: { id } }: IProps): Metadata {

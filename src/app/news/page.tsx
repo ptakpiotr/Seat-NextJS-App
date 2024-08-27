@@ -13,6 +13,8 @@ async function News() {
       image: true,
       tags: true,
       title: true,
+      authorId: true,
+      author: true,
     },
   });
 
