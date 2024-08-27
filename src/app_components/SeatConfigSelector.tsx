@@ -7,23 +7,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Event } from "@prisma/client";
 import { IObject } from "../../Types";
 
 interface IProps {
-  setObjects: (newObjects: IObject[]) => void;
+  events: Event[];
+  setObjects?: (newObjects: IObject[]) => void;
 }
 
-function SeatConfigSelector() {
-  //TODO: get objects
+function SeatConfigSelector({ events }: IProps) {
   return (
     <Select>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Configuration" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="light">First</SelectItem>
-        <SelectItem value="dark">Second</SelectItem>
-        <SelectItem value="system">Third</SelectItem>
+        {events.map((ev) => (
+          <SelectItem key={`event_${ev.id}`} value={ev.id.toString()}>
+            {ev.info}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );

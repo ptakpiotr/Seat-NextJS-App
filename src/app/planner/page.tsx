@@ -1,14 +1,24 @@
-"use client";
+import { PrismaClient } from "@prisma/client";
 import dynamic from "next/dynamic";
 
 const SeatWrapper = dynamic(() => import("@/app_components/SeatWrapper"), {
   ssr: false,
 });
 
-function Planner() {
+async function Planner() {
+  const client = new PrismaClient();
+  const events = await client.event.findMany({
+    where: {
+      start: {
+        gte: new Date(),
+      },
+    },
+  });
+  
+
   return (
     <div>
-      <SeatWrapper isEditable={false} />
+      <SeatWrapper isEditable={true} eventsToChoose={events} />
     </div>
   );
 }

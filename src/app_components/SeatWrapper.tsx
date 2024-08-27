@@ -25,14 +25,16 @@ import { KonvaEventObject } from "konva/lib/Node";
 import { uuid } from "uuidv4";
 import { useToast } from "@/components/ui/use-toast";
 import SeatConfigSelector from "./SeatConfigSelector";
+import { Event } from "@prisma/client";
 
 export const SeatObjectsContext = createContext<ISeatObjectsContext>({});
 
 interface IProps {
   isEditable: boolean;
+  eventsToChoose: Event[];
 }
 
-function SeatWrapper({ isEditable }: IProps) {
+function SeatWrapper({ isEditable, eventsToChoose }: IProps) {
   const [objects, setObjects] = useState<IObject[]>(
     JSON.parse(localStorage.getItem("planner-contents") ?? "[]") as IObject[]
   );
@@ -43,8 +45,7 @@ function SeatWrapper({ isEditable }: IProps) {
 
   const setSelectorObjectValues = useCallback((newObjects: IObject[]) => {
     setObjects(newObjects);
-  },
-  []);
+  }, []);
 
   const addObject = useCallback((object: IObject) => {
     const objectToBeAdded = {
@@ -234,7 +235,7 @@ function SeatWrapper({ isEditable }: IProps) {
               </Fragment>
             ) : (
               <Fragment>
-                <SeatConfigSelector />
+                <SeatConfigSelector events={eventsToChoose} />
               </Fragment>
             )}
             <ContextMenuTrigger>
