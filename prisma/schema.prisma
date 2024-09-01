@@ -36,13 +36,54 @@ model Event {
   info     String
   author   Author   @relation(fields: [authorId], references: [id])
   authorId String
-  people   Author[] @relation("People")
+  objects  Object[]
 }
 
 model Author {
-  id         String  @id
-  name       String  @unique
-  news       News[]
-  event      Event[]
-  userEvents Event[] @relation("People")
+  id      String   @id
+  name    String   @unique
+  news    News[]
+  event   Event[]
+}
+
+model Object {
+  id            String       @id @default(uuid())
+  coords        Coords       @relation(fields: [coordsId], references: [id])
+  type          ObjectMode?
+  rotation      Float
+  dimensions    Dimensions   @relation(fields: [dimensionsId], references: [id])
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  coordsId      String
+  dimensionsId  String
+  reservationId String?
+  event         Event        @relation(fields: [eventId], references: [id])
+  eventId       Int
+  authorId      String
+}
+
+model Coords {
+  id     String   @id @default(uuid())
+  x      Float
+  y      Float
+  Object Object[]
+}
+
+enum ObjectMode {
+  RECT
+  CIRCLE
+}
+
+model Dimensions {
+  id     String   @id @default(uuid())
+  width  Float
+  height Float
+  radius Float
+  Object Object[]
+}
+
+model Reservation {
+  id         String   @id @default(uuid())
+  isReserved Boolean
+  by         String?
+  Object     Object[]
 }
