@@ -29,7 +29,7 @@ export interface IObject {
   type?: ObjectMode;
   rotation: number;
   dimensions: IRectDimensions | ICircleDimensions;
-  reservation: IReservation;
+  reservation?: IReservation;
 }
 
 export type ManagableObject = Omit<IObject, "id" | "coords">;

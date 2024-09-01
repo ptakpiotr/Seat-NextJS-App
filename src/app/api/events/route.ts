@@ -3,8 +3,9 @@ import { EventType } from "../../../../validation";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 
+const client = new PrismaClient();
+
 export async function POST(request: NextRequest) {
-  const client = new PrismaClient();
   const session = await getServerSession();
   const event = (await request.json()) as EventType;
 
@@ -23,18 +24,7 @@ export async function POST(request: NextRequest) {
             id: session!.user!.email!,
           },
         },
-      },
-      people: {
-        connectOrCreate: {
-          create: {
-            id: session!.user!.email!,
-            name: session!.user!.name!,
-          },
-          where: {
-            id: session!.user!.email!,
-          },
-        },
-      },
+      }
     },
   });
 

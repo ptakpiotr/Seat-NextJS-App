@@ -6,7 +6,9 @@ import {
   createContext,
   ElementRef,
   Fragment,
+  Suspense,
   useCallback,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -26,25 +28,46 @@ import { uuid } from "uuidv4";
 import { useToast } from "@/components/ui/use-toast";
 import SeatConfigSelector from "./SeatConfigSelector";
 import { Event } from "@prisma/client";
+import LoadingSpinner from "./LoadingSpinner";
 
 export const SeatObjectsContext = createContext<ISeatObjectsContext>({});
 
 interface IProps {
   isEditable: boolean;
   eventsToChoose: Event[];
+  userId?: string | null;
 }
 
-function SeatWrapper({ isEditable, eventsToChoose }: IProps) {
-  const [objects, setObjects] = useState<IObject[]>(
-    JSON.parse(localStorage.getItem("planner-contents") ?? "[]") as IObject[]
-  );
+function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
+  const [objects, setObjects] = useState<IObject[]>([]);
+  const [chosenEvent, setChosenEvent] = useState<Event | null>(null);
   const transformerRef = useRef<ElementRef<typeof Transformer>>(null);
   const editingShapeRef = useRef<IObject | null>();
 
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (chosenEvent) {
+      fetch(`/api/objects?event_id=${chosenEvent.id}`)
+        .then((resp) => resp.json())
+        .then((dt) => {
+          if (dt) {
+            const objects = dt as IObject[];
+            console.log(objects);
+            setObjects(objects);
+          }
+        });
+    } else {
+      setObjects([]);
+    }
+  }, [chosenEvent]);
+
   const setSelectorObjectValues = useCallback((newObjects: IObject[]) => {
     setObjects(newObjects);
+  }, []);
+
+  const setEvent = useCallback((newEvent: Event) => {
+    setChosenEvent(newEvent);
   }, []);
 
   const addObject = useCallback((object: IObject) => {
@@ -65,13 +88,53 @@ function SeatWrapper({ isEditable, eventsToChoose }: IProps) {
     editingShapeRef.current = o;
   };
 
+  const applyEditableChanges = (
+    e: KonvaEventObject<any>,
+    o: IObject | null | undefined
+  ) => {
+    if (o) {
+      const prevX = o.coords.x;
+      const prevY = o.coords.y;
+
+      o.coords = {
+        x: e.target.x(),
+        y: e.target.y(),
+      };
+      o.rotation = e.target.rotation();
+
+      switch (o.type) {
+        case ObjectMode.RECT:
+          o.dimensions = {
+            height: Math.floor(Math.abs(o.coords.y - prevY)),
+            width: Math.floor(Math.abs(o.coords.x - prevX)),
+          } satisfies IRectDimensions;
+          break;
+        case ObjectMode.CIRCLE:
+          o.dimensions = {
+            radius: Math.floor(
+              Math.sqrt(
+                Math.pow(prevX - o.coords.x, 2) +
+                  Math.pow(prevY - o.coords.y, 2)
+              )
+            ),
+          } satisfies ICircleDimensions;
+          break;
+      }
+      console.log(o);
+      setObjects((prev) => {
+        const otherObjects = prev.filter((obj) => obj.id !== o.id);
+        return [...otherObjects, o];
+      });
+    }
+  };
+
   const onNotEditableClickHandler = (object: IObject) => {
     const editedObject = objects?.find((o) => o.id === object.id);
 
     if (editedObject) {
       editedObject.reservation = {
-        isReserved: !editedObject.reservation.isReserved,
-        by: editedObject.reservation.by ? "" : "TODO: useSession",
+        isReserved: !editedObject.reservation?.isReserved,
+        by: editedObject.reservation?.by ? "" : "TODO: useSession",
       };
 
       setObjects((prev) => {
@@ -83,14 +146,20 @@ function SeatWrapper({ isEditable, eventsToChoose }: IProps) {
     }
   };
 
-  const onClickOutHandler = () => {
+  const onClickOutHandler = async () => {
     transformerRef.current?.nodes([]);
     editingShapeRef.current = null;
 
-    localStorage.setItem("planner-contents", JSON.stringify(objects));
+    if (chosenEvent) {
+      await fetch(`/api/objects?event_id=${chosenEvent.id}`, {
+        method: "POST",
+        body: JSON.stringify(objects),
+        credentials: "include",
+      });
+    }
   };
 
-  const clearContents = () => {
+  const clearContents = async () => {
     setObjects([]);
     onClickOutHandler();
 
@@ -98,6 +167,13 @@ function SeatWrapper({ isEditable, eventsToChoose }: IProps) {
       title: "Content has been cleared",
       description: "The planner contents have been cleared",
     });
+
+    if (chosenEvent) {
+      await fetch(`/api/objects?event_id=${chosenEvent.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+    }
   };
 
   const onDragEventHandler = (
@@ -216,6 +292,10 @@ function SeatWrapper({ isEditable, eventsToChoose }: IProps) {
       <div>
         <ContextMenu>
           <Drawer>
+            <Fragment>
+              <SeatConfigSelector events={eventsToChoose} setEvent={setEvent} />
+            </Fragment>
+
             {isEditable ? (
               <Fragment>
                 <Button
@@ -234,9 +314,7 @@ function SeatWrapper({ isEditable, eventsToChoose }: IProps) {
                 </Button>
               </Fragment>
             ) : (
-              <Fragment>
-                <SeatConfigSelector events={eventsToChoose} />
-              </Fragment>
+              <></>
             )}
             <ContextMenuTrigger>
               <Stage
@@ -248,7 +326,13 @@ function SeatWrapper({ isEditable, eventsToChoose }: IProps) {
               >
                 <Layer>
                   {objects?.map((obj) => renderer(obj))}
-                  <Transformer ref={transformerRef} flipEnabled={false} />
+                  <Transformer
+                    ref={transformerRef}
+                    flipEnabled={false}
+                    onTransformEnd={(e) => {
+                      applyEditableChanges(e, editingShapeRef.current);
+                    }}
+                  />
                 </Layer>
               </Stage>
             </ContextMenuTrigger>
@@ -278,4 +362,10 @@ function SeatWrapper({ isEditable, eventsToChoose }: IProps) {
   );
 }
 
-export default SeatWrapper;
+export default (props: IProps) => {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <SeatWrapper {...props} />
+    </Suspense>
+  );
+};

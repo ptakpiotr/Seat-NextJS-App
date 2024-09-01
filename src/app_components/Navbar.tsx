@@ -8,6 +8,7 @@ import {
   LogInIcon,
   LogOutIcon,
   LockIcon,
+  MoveDiagonalIcon,
 } from "lucide-react";
 
 import styles from "./Navbar.module.css";
@@ -31,6 +32,12 @@ async function Navbar() {
           href="/planner"
         >
           Planner {!isLogged ? <LockIcon /> : <NotebookIcon />}
+        </Link>
+        <Link
+          className={!isLogged ? styles.navbarLinkLocked : styles.navbarLink}
+          href="/manager"
+        >
+          Manager {!isLogged ? <LockIcon /> : <MoveDiagonalIcon />}
         </Link>
         <Link
           className={!isLogged ? styles.navbarLinkLocked : styles.navbarLink}

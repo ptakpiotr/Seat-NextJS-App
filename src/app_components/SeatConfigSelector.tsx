@@ -8,16 +8,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Event } from "@prisma/client";
-import { IObject } from "../../Types";
 
 interface IProps {
   events: Event[];
-  setObjects?: (newObjects: IObject[]) => void;
+  setEvent: (event: Event) => void;
 }
 
-function SeatConfigSelector({ events }: IProps) {
+function SeatConfigSelector({ events, setEvent }: IProps) {
   return (
-    <Select>
+    <Select
+      onValueChange={(val: string) => {
+        const event = events.find((e) => e.id === parseInt(val));
+
+        if (event) {
+          setEvent(event);
+        }
+      }}
+    >
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Configuration" />
       </SelectTrigger>

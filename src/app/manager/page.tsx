@@ -6,23 +6,27 @@ const SeatWrapper = dynamic(() => import("@/app_components/SeatWrapper"), {
   ssr: false,
 });
 
-async function Planner() {
+async function Manager() {
   const client = new PrismaClient();
   const session = await getServerSession();
+
   const events = await client.event.findMany({
     where: {
       start: {
         gte: new Date(),
       },
-      authorId: session?.user?.email ?? "",
     },
   });
 
   return (
     <div>
-      <SeatWrapper isEditable={true} eventsToChoose={events} />
+      <SeatWrapper
+        isEditable={false}
+        userId={session?.user?.email}
+        eventsToChoose={events}
+      />
     </div>
   );
 }
 
-export default Planner;
+export default Manager;
