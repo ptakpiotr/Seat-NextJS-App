@@ -22,7 +22,7 @@ function NewsContent({ isLogged, news }: IProps) {
 
   const closeDrawer = useCallback(() => {
     manageOpenState(false);
-  }, []);
+  }, [manageOpenState]);
 
   return (
     <Drawer open={isOpen}>

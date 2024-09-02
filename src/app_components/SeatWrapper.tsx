@@ -205,86 +205,80 @@ function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
     } else {
       return "#0d3840";
     }
-  }, []);
+  }, [isEditable]);
 
-  const rectRenderer = useMemo(
-    () => (object: IObject) => {
-      const dimensions = object.dimensions as IRectDimensions;
+  const rectRenderer = (object: IObject) => {
+    const dimensions = object.dimensions as IRectDimensions;
 
-      const objectProps = isEditable
-        ? {
-            onClick: (e: KonvaEventObject<MouseEvent>) =>
-              onEditableClickHandler(e, object),
-            draggable: true,
-            onDragEnd: (e: KonvaEventObject<DragEvent>) =>
-              onDragEventHandler(e, object),
-          }
-        : {
-            onClick: () => onNotEditableClickHandler(object),
-          };
+    const objectProps = isEditable
+      ? {
+          onClick: (e: KonvaEventObject<MouseEvent>) =>
+            onEditableClickHandler(e, object),
+          draggable: true,
+          onDragEnd: (e: KonvaEventObject<DragEvent>) =>
+            onDragEventHandler(e, object),
+        }
+      : {
+          onClick: () => onNotEditableClickHandler(object),
+        };
 
-      const color = colorRenderer(object);
+    const color = colorRenderer(object);
 
-      return (
-        <>
-          <Rect
-            key={object.id}
-            id={object.id}
-            x={object.coords.x}
-            y={object.coords.y}
-            rotation={object.rotation}
-            width={dimensions.width}
-            height={dimensions.height}
-            {...objectProps}
-            fill={color}
-          />
-          {object.reservation?.isReserved && (
-            <Text text={object.reservation.by} {...object.coords} />
-          )}
-        </>
-      );
-    },
-    [isEditable, objects]
-  );
+    return (
+      <>
+        <Rect
+          key={object.id}
+          id={object.id}
+          x={object.coords.x}
+          y={object.coords.y}
+          rotation={object.rotation}
+          width={dimensions.width}
+          height={dimensions.height}
+          {...objectProps}
+          fill={color}
+        />
+        {object.reservation?.isReserved && (
+          <Text text={object.reservation.by} {...object.coords} />
+        )}
+      </>
+    );
+  };
 
-  const circleRenderer = useMemo(
-    () => (object: IObject) => {
-      const dimensions = object.dimensions as ICircleDimensions;
+  const circleRenderer = (object: IObject) => {
+    const dimensions = object.dimensions as ICircleDimensions;
 
-      const objectProps = isEditable
-        ? {
-            onClick: (e: KonvaEventObject<MouseEvent>) =>
-              onEditableClickHandler(e, object),
-            draggable: true,
-            onDragEnd: (e: KonvaEventObject<DragEvent>) =>
-              onDragEventHandler(e, object),
-          }
-        : {
-            onClick: () => onNotEditableClickHandler(object),
-          };
+    const objectProps = isEditable
+      ? {
+          onClick: (e: KonvaEventObject<MouseEvent>) =>
+            onEditableClickHandler(e, object),
+          draggable: true,
+          onDragEnd: (e: KonvaEventObject<DragEvent>) =>
+            onDragEventHandler(e, object),
+        }
+      : {
+          onClick: () => onNotEditableClickHandler(object),
+        };
 
-      const color = colorRenderer(object);
-      console.log(object.reservation);
-      return (
-        <>
-          <Circle
-            key={object.id}
-            id={object.id}
-            x={object.coords.x}
-            y={object.coords.y}
-            rotation={object.rotation}
-            radius={dimensions.radius}
-            {...objectProps}
-            fill={color}
-          />
-          {object.reservation?.isReserved && (
-            <Text text={object.reservation.by} {...object.coords} />
-          )}
-        </>
-      );
-    },
-    [isEditable, objects]
-  );
+    const color = colorRenderer(object);
+    console.log(object.reservation);
+    return (
+      <>
+        <Circle
+          key={object.id}
+          id={object.id}
+          x={object.coords.x}
+          y={object.coords.y}
+          rotation={object.rotation}
+          radius={dimensions.radius}
+          {...objectProps}
+          fill={color}
+        />
+        {object.reservation?.isReserved && (
+          <Text text={object.reservation.by} {...object.coords} />
+        )}
+      </>
+    );
+  };
 
   const renderer = useCallback(
     (object: IObject) => {
@@ -297,7 +291,7 @@ function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
           return;
       }
     },
-    [isEditable, objects]
+    [rectRenderer, circleRenderer]
   );
 
   return (
@@ -378,10 +372,12 @@ function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
   );
 }
 
-export default (props: IProps) => {
+const SeatWrapperWithSuspense = (props: IProps) => {
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <SeatWrapper {...props} />
     </Suspense>
   );
 };
+
+export default SeatWrapperWithSuspense;

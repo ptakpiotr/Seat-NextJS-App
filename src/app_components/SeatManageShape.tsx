@@ -51,7 +51,7 @@ function SeatManageShape() {
     if (addObject) {
       addObject(managedObject as IObject);
     }
-  }, [managedObject]);
+  }, [addObject, managedObject]);
 
   return (
     <DrawerContent>

@@ -33,7 +33,7 @@ function SeatManagerSquare() {
         dimensions,
       });
     }
-  }, [dimensions]);
+  }, [manageObject, dimensions]);
 
   return (
     <div>

@@ -47,7 +47,7 @@ function AppCalendar({ events }: IProps) {
     }
 
     router.refresh();
-  }, []);
+  }, [router, toast]);
 
   const deleteEvent = useCallback(async (event: IAppCalendarEvent) => {
     if (event.id) {
@@ -58,7 +58,7 @@ function AppCalendar({ events }: IProps) {
     }
 
     router.refresh();
-  }, []);
+  }, [router]);
 
   return (
     <div style={{ height: "90vh" }}>

@@ -18,7 +18,7 @@ function SeatManagerCircle() {
         },
       });
     }
-  }, []);
+  }, [manageObject]);
 
   return (
     <div>

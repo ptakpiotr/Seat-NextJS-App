@@ -19,7 +19,7 @@ function SeatManageShapePersonalizer() {
         type: m,
       });
     }
-  }, []);
+  }, [manageObject]);
 
   return (
     <div>
