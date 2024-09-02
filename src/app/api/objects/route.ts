@@ -1,8 +1,4 @@
-import {
-  PrismaClient,
-  type Object as DbObject,
-  ObjectMode as DbObjectMode,
-} from "@prisma/client";
+import { PrismaClient, ObjectMode as DbObjectMode } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import {
   ICircleDimensions,
@@ -50,15 +46,13 @@ export async function POST(request: NextRequest) {
   }
 
   const objects = body as IObject[];
-
   //BAD PRACTICE!!
-  await prismaClient.object.deleteMany({
+  const existingObjects = await prismaClient.object.findMany({
     where: {
       eventId: parseInt(eventId),
-      authorId: session.user.email!,
     },
   });
-  console.log(objects);
+
   for (const obj of objects) {
     const dimensions =
       obj.type === ObjectMode.RECT
@@ -71,6 +65,27 @@ export async function POST(request: NextRequest) {
             width: -1,
             height: -1,
           };
+    const existingObject = existingObjects.find((o) => o.id === obj.id);
+
+    if (existingObject) {
+      await prismaClient.dimensions.delete({
+        where: {
+          id: existingObject.dimensionsId,
+        },
+      });
+
+      await prismaClient.reservation.delete({
+        where: {
+          id: existingObject.reservationId ?? "",
+        },
+      });
+
+      await prismaClient.coords.delete({
+        where: {
+          id: existingObject.coordsId,
+        },
+      });
+    }
 
     await prismaClient.object.create({
       data: {
@@ -90,6 +105,12 @@ export async function POST(request: NextRequest) {
         event: {
           connect: {
             id: parseInt(eventId),
+          },
+        },
+        reservation: {
+          create: {
+            isReserved: obj.reservation?.isReserved ?? false,
+            by: obj.reservation?.by,
           },
         },
         type:

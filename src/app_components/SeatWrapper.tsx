@@ -1,5 +1,5 @@
 "use client";
-import { Circle, Layer, Rect, Stage, Transformer } from "react-konva";
+import { Circle, Layer, Rect, Stage, Transformer, Text } from "react-konva";
 import { Button } from "@/components/ui/button";
 import { SaveIcon, Trash2Icon } from "lucide-react";
 import {
@@ -9,6 +9,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -53,7 +54,7 @@ function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
         .then((dt) => {
           if (dt) {
             const objects = dt as IObject[];
-            console.log(objects);
+
             setObjects(objects);
           }
         });
@@ -61,10 +62,6 @@ function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
       setObjects([]);
     }
   }, [chosenEvent]);
-
-  const setSelectorObjectValues = useCallback((newObjects: IObject[]) => {
-    setObjects(newObjects);
-  }, []);
 
   const setEvent = useCallback((newEvent: Event) => {
     setChosenEvent(newEvent);
@@ -110,17 +107,19 @@ function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
           } satisfies IRectDimensions;
           break;
         case ObjectMode.CIRCLE:
+          const radius = Math.floor(
+            Math.sqrt(
+              Math.pow(prevX - o.coords.x, 2) + Math.pow(prevY - o.coords.y, 2)
+            )
+          );
+
           o.dimensions = {
-            radius: Math.floor(
-              Math.sqrt(
-                Math.pow(prevX - o.coords.x, 2) +
-                  Math.pow(prevY - o.coords.y, 2)
-              )
-            ),
+            radius,
           } satisfies ICircleDimensions;
+
           break;
       }
-      console.log(o);
+
       setObjects((prev) => {
         const otherObjects = prev.filter((obj) => obj.id !== o.id);
         return [...otherObjects, o];
@@ -131,15 +130,16 @@ function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
   const onNotEditableClickHandler = (object: IObject) => {
     const editedObject = objects?.find((o) => o.id === object.id);
 
-    if (editedObject) {
+    if (editedObject && userId) {
       editedObject.reservation = {
         isReserved: !editedObject.reservation?.isReserved,
-        by: editedObject.reservation?.by ? "" : "TODO: useSession",
+        by: editedObject.reservation?.by === userId ? undefined : userId,
       };
+
+      console.log(editedObject.reservation);
 
       setObjects((prev) => {
         const otherObjects = prev.filter((o) => o.id !== object.id);
-        //TODO: set object sizes
 
         return [...otherObjects, editedObject];
       });
@@ -191,7 +191,6 @@ function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
 
       setObjects((prev) => {
         const otherObjects = prev.filter((o) => o.id !== object.id);
-        //TODO: set object sizes
 
         return [...otherObjects, editedObject];
       });
@@ -202,85 +201,104 @@ function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
     if (isEditable) {
       return "#6E7F8A";
     } else if (object.reservation?.isReserved) {
-      return "#7D98A1";
+      return "#267894";
     } else {
-      return "#4D5E61";
+      return "#0d3840";
     }
   }, []);
 
-  const rectRenderer = useCallback((object: IObject) => {
-    const dimensions = object.dimensions as IRectDimensions;
+  const rectRenderer = useMemo(
+    () => (object: IObject) => {
+      const dimensions = object.dimensions as IRectDimensions;
 
-    const objectProps = isEditable
-      ? {
-          onClick: (e: KonvaEventObject<MouseEvent>) =>
-            onEditableClickHandler(e, object),
-          draggable: true,
-          onDragEnd: (e: KonvaEventObject<DragEvent>) =>
-            onDragEventHandler(e, object),
-        }
-      : {
-          onClick: () => onNotEditableClickHandler(object),
-        };
+      const objectProps = isEditable
+        ? {
+            onClick: (e: KonvaEventObject<MouseEvent>) =>
+              onEditableClickHandler(e, object),
+            draggable: true,
+            onDragEnd: (e: KonvaEventObject<DragEvent>) =>
+              onDragEventHandler(e, object),
+          }
+        : {
+            onClick: () => onNotEditableClickHandler(object),
+          };
 
-    const color = colorRenderer(object);
+      const color = colorRenderer(object);
 
-    return (
-      <Rect
-        key={object.id}
-        id={object.id}
-        x={object.coords.x}
-        y={object.coords.y}
-        rotation={object.rotation}
-        width={dimensions.width}
-        height={dimensions.height}
-        {...objectProps}
-        fill={color}
-      />
-    );
-  }, []);
+      return (
+        <>
+          <Rect
+            key={object.id}
+            id={object.id}
+            x={object.coords.x}
+            y={object.coords.y}
+            rotation={object.rotation}
+            width={dimensions.width}
+            height={dimensions.height}
+            {...objectProps}
+            fill={color}
+          />
+          {object.reservation?.isReserved && (
+            <Text text={object.reservation.by} {...object.coords} />
+          )}
+        </>
+      );
+    },
+    [isEditable, objects]
+  );
 
-  const circleRenderer = useCallback((object: IObject) => {
-    const dimensions = object.dimensions as ICircleDimensions;
+  const circleRenderer = useMemo(
+    () => (object: IObject) => {
+      const dimensions = object.dimensions as ICircleDimensions;
 
-    const objectProps = isEditable
-      ? {
-          onClick: (e: KonvaEventObject<MouseEvent>) =>
-            onEditableClickHandler(e, object),
-          draggable: true,
-          onDragEnd: (e: KonvaEventObject<DragEvent>) =>
-            onDragEventHandler(e, object),
-        }
-      : {
-          onClick: () => onNotEditableClickHandler(object),
-        };
+      const objectProps = isEditable
+        ? {
+            onClick: (e: KonvaEventObject<MouseEvent>) =>
+              onEditableClickHandler(e, object),
+            draggable: true,
+            onDragEnd: (e: KonvaEventObject<DragEvent>) =>
+              onDragEventHandler(e, object),
+          }
+        : {
+            onClick: () => onNotEditableClickHandler(object),
+          };
 
-    const color = colorRenderer(object);
+      const color = colorRenderer(object);
+      console.log(object.reservation);
+      return (
+        <>
+          <Circle
+            key={object.id}
+            id={object.id}
+            x={object.coords.x}
+            y={object.coords.y}
+            rotation={object.rotation}
+            radius={dimensions.radius}
+            {...objectProps}
+            fill={color}
+          />
+          {object.reservation?.isReserved && (
+            <Text text={object.reservation.by} {...object.coords} />
+          )}
+        </>
+      );
+    },
+    [isEditable, objects]
+  );
 
-    return (
-      <Circle
-        key={object.id}
-        id={object.id}
-        x={object.coords.x}
-        y={object.coords.y}
-        rotation={object.rotation}
-        radius={dimensions.radius}
-        {...objectProps}
-        fill={color}
-      />
-    );
-  }, []);
-
-  const renderer = useCallback((object: IObject) => {
-    switch (object.type) {
-      case ObjectMode.RECT:
-        return rectRenderer(object);
-      case ObjectMode.CIRCLE:
-        return circleRenderer(object);
-      default:
-        return;
-    }
-  }, []);
+  const renderer = useCallback(
+    (object: IObject) => {
+      switch (object.type) {
+        case ObjectMode.RECT:
+          return rectRenderer(object);
+        case ObjectMode.CIRCLE:
+          return circleRenderer(object);
+        default:
+          return;
+      }
+    },
+    [isEditable, objects]
+  );
 
   return (
     <SeatObjectsContext.Provider
@@ -296,29 +314,27 @@ function SeatWrapper({ isEditable, eventsToChoose, userId }: IProps) {
               <SeatConfigSelector events={eventsToChoose} setEvent={setEvent} />
             </Fragment>
 
-            {isEditable ? (
-              <Fragment>
-                <Button
-                  variant={"default"}
-                  className="p-3"
-                  onClick={onClickOutHandler}
-                >
-                  Save <SaveIcon />
-                </Button>
+            <div className="mb-2">
+              <Button
+                variant={"default"}
+                className="p-3 mr-2"
+                onClick={onClickOutHandler}
+              >
+                Save <SaveIcon />
+              </Button>
+              {isEditable && (
                 <Button
                   variant={"destructive"}
-                  className="p-3"
+                  className="p-3 mr-2"
                   onClick={clearContents}
                 >
                   Clear <Trash2Icon />
                 </Button>
-              </Fragment>
-            ) : (
-              <></>
-            )}
+              )}
+            </div>
             <ContextMenuTrigger>
               <Stage
-                width={window.innerWidth}
+                width={window.innerWidth - 100}
                 height={window.innerHeight - 200}
                 style={{
                   border: "1px solid #555",

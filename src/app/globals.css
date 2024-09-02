@@ -59,9 +59,17 @@
   }
 }
 
-main{
+main {
   margin-top: 1rem;
   padding: 0.5rem;
+}
+
+main.mainPage {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  column-gap: 0.5rem;
+  max-width: 90vw;
 }
 
 @layer base {

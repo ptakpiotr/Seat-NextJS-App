@@ -25,7 +25,7 @@ function SeatConfigSelector({ events, setEvent }: IProps) {
         }
       }}
     >
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-[180px] mb-2">
         <SelectValue placeholder="Configuration" />
       </SelectTrigger>
       <SelectContent>

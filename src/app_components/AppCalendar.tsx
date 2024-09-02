@@ -39,7 +39,7 @@ function AppCalendar({ events }: IProps) {
       });
     } catch (err) {
       const validationErr = err as ValidationError;
-      console.log(err);
+      
       toast({
         title: "An error occured",
         content: validationErr.message,

@@ -48,15 +48,15 @@ model Author {
 
 model Object {
   id            String       @id @default(uuid())
-  coords        Coords       @relation(fields: [coordsId], references: [id])
+  coords        Coords       @relation(fields: [coordsId], references: [id], onDelete: Cascade)
   type          ObjectMode?
   rotation      Float
-  dimensions    Dimensions   @relation(fields: [dimensionsId], references: [id])
-  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  dimensions    Dimensions   @relation(fields: [dimensionsId], references: [id], onDelete: Cascade)
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   coordsId      String
   dimensionsId  String
   reservationId String?
-  event         Event        @relation(fields: [eventId], references: [id])
+  event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId       Int
   authorId      String
 }
